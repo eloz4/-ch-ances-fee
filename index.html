@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Échéance émission · Réforme facturation électronique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F5;
+    --surface:#FFFFFF;
+    --ink:#14233B;
+    --muted:#5B6675;
+    --hair:#DBE1EA;
+    --y2026:#A8520A;        /* émission imminente */
+    --y2026-bg:#FAEAD7;
+    --y2027:#0E6E84;        /* émission différée */
+    --y2027-bg:#DCEDF1;
+    --neutral:#6B7280;
+    --neutral-bg:#E8EAEE;
+    --focus:#1F66E0;
+    --radius:14px;
+  }
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:40px 24px 80px}
+
+  /* ---- Header ---- */
+  header{margin-bottom:32px}
+  .eyebrow{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin:0 0 10px;
+  }
+  h1{
+    font-family:"Spectral",serif;font-weight:600;
+    font-size:clamp(28px,4.4vw,42px);line-height:1.08;margin:0 0 12px;
+    letter-spacing:-.01em;
+  }
+  .lede{font-size:16px;color:var(--muted);max-width:62ch;margin:0}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* ---- Input panel ---- */
+  .panel{
+    background:var(--surface);border:1px solid var(--hair);
+    border-radius:var(--radius);padding:22px;margin-top:28px;
+  }
+  .panel-label{font-size:13px;font-weight:600;margin:0 0 4px}
+  .panel-hint{font-size:13px;color:var(--muted);margin:0 0 12px}
+  textarea{
+    width:100%;min-height:150px;resize:vertical;
+    font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.7;
+    padding:14px 16px;border:1px solid var(--hair);border-radius:10px;
+    background:#FBFCFD;color:var(--ink);
+  }
+  textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-color:transparent}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  button{
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:10px;padding:11px 20px;border:1px solid transparent;transition:background .15s,opacity .15s;
+  }
+  button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-primary:hover{background:#1e3357}
+  .btn-primary:disabled{opacity:.5;cursor:default}
+  .btn-ghost{background:transparent;color:var(--muted);border-color:var(--hair)}
+  .btn-ghost:hover{color:var(--ink);border-color:var(--muted)}
+  .progress{font-size:13px;color:var(--muted);margin-left:auto}
+
+  /* ---- Summary ---- */
+  .summary{display:none;gap:10px;flex-wrap:wrap;margin:30px 0 18px}
+  .summary.show{display:flex}
+  .pill{
+    display:inline-flex;align-items:baseline;gap:8px;
+    padding:8px 14px;border-radius:999px;font-size:13px;font-weight:500;
+    border:1px solid var(--hair);background:var(--surface);
+  }
+  .pill b{font-family:"Spectral",serif;font-size:18px;font-weight:600}
+  .pill.s26 b{color:var(--y2026)} .pill.s27 b{color:var(--y2027)} .pill.sx b{color:var(--neutral)}
+
+  /* ---- Banner (errors) ---- */
+  .banner{display:none;margin-top:24px;padding:16px 18px;border-radius:12px;
+    background:var(--y2026-bg);border:1px solid #E4C39A;font-size:14px;color:#5a2e08}
+  .banner.show{display:block}
+  .banner b{font-weight:600}
+  .banner code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#fff;padding:1px 5px;border-radius:4px}
+
+  /* ---- Results ---- */
+  .results{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .fiche{
+    display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;
+    background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);
+    padding:18px 20px;animation:rise .35s ease both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .fiche.flag{border-left:3px solid var(--neutral)}
+  .ident .query{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:3px}
+  .ident .name{font-family:"Spectral",serif;font-size:18px;font-weight:600;line-height:1.2}
+  .ident .meta{font-size:12.5px;color:var(--muted);margin-top:4px;font-family:"JetBrains Mono",monospace}
+  .ident .note{font-size:12.5px;color:#7a4410;margin-top:6px;max-width:46ch}
+
+  .cat{
+    font-family:"JetBrains Mono",monospace;font-weight:500;font-size:12px;
+    padding:5px 10px;border-radius:7px;background:var(--neutral-bg);color:#3a4150;white-space:nowrap;
+  }
+  .cat.ge,.cat.eti{background:var(--y2026-bg);color:var(--y2026)}
+  .cat.pme{background:var(--y2027-bg);color:var(--y2027)}
+
+  /* Signature: the calendar "tampon" */
+  .stamp{position:relative;text-align:center;min-width:108px;
+    border:1.5px solid var(--ink);border-radius:10px;padding:14px 12px 11px;background:#fff}
+  .stamp::before,.stamp::after{content:"";position:absolute;top:-7px;width:8px;height:11px;
+    border:1.5px solid var(--ink);border-bottom:none;border-radius:3px 3px 0 0;background:#fff}
+  .stamp::before{left:24px} .stamp::after{right:24px}
+  .stamp .kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .stamp .date{font-family:"Spectral",serif;font-size:13px;color:var(--muted);margin-top:2px}
+  .stamp .year{font-family:"Spectral",serif;font-weight:600;font-size:30px;line-height:1;margin-top:2px}
+  .stamp.s26{border-color:var(--y2026)} .stamp.s26 .year{color:var(--y2026)} .stamp.s26::before,.stamp.s26::after{border-color:var(--y2026)}
+  .stamp.s27{border-color:var(--y2027)} .stamp.s27 .year{color:var(--y2027)} .stamp.s27::before,.stamp.s27::after{border-color:var(--y2027)}
+  .stamp.sx{border-color:var(--neutral)} .stamp.sx .year{color:var(--neutral);font-size:20px;padding:5px 0} .stamp.sx::before,.stamp.sx::after{border-color:var(--neutral)}
+
+  /* ---- Method note ---- */
+  .method{margin-top:40px;padding-top:26px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--muted)}
+  .method h2{font-family:"Spectral",serif;font-size:17px;color:var(--ink);font-weight:600;margin:0 0 12px}
+  .method p{margin:0 0 10px;max-width:74ch}
+  .method b{color:var(--ink);font-weight:600}
+  .method .rule{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink);
+    background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;margin:4px 0 14px;line-height:1.8}
+  .method a{color:var(--y2027)}
+
+  @media (max-width:680px){
+    .wrap{padding:28px 16px 60px}
+    .fiche{grid-template-columns:1fr;gap:14px}
+    .fiche .cat{justify-self:start}
+    .stamp{justify-self:start}
+    .progress{margin-left:0;width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Réforme de la facturation électronique</p>
+    <h1>À quelle date chaque partenaire devra-t-il émettre&nbsp;?</h1>
+    <p class="lede">Collez un ou plusieurs noms d'entreprise ou numéros SIREN. L'outil interroge la base officielle de l'INSEE et indique, pour chacun, l'échéance d'obligation d'<b>émission</b> de factures électroniques&nbsp;: <b>1ᵉʳ&nbsp;septembre&nbsp;2026</b> (grandes entreprises et ETI) ou <b>1ᵉʳ&nbsp;septembre&nbsp;2027</b> (PME, TPE et micro). La réception, elle, s'impose à tout le monde dès septembre&nbsp;2026.</p>
+  </header>
+
+  <div class="panel">
+    <p class="panel-label">Entreprises à vérifier</p>
+    <p class="panel-hint">Une par ligne — nom (ex. <i>Enedis</i>) ou SIREN à 9&nbsp;chiffres (recherche exacte).</p>
+    <textarea id="input" spellcheck="false" aria-label="Liste d'entreprises"></textarea>
+    <div class="controls">
+      <button class="btn-primary" id="run">Vérifier les échéances</button>
+      <button class="btn-ghost" id="export" disabled>Exporter en CSV</button>
+      <span class="progress" id="progress" aria-live="polite"></span>
+    </div>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="summary" id="summary"></div>
+  <div class="results" id="results"></div>
+
+  <div class="method">
+    <h2>Méthode et limites</h2>
+    <p>Le classement repose sur la variable <b>catégorie d'entreprise</b> calculée par l'INSEE (trois valeurs&nbsp;: GE, ETI, PME), récupérée via l'API ouverte <i>Recherche d'entreprises</i> de l'État. La règle appliquée&nbsp;:</p>
+    <div class="rule">GE ou ETI&nbsp;→&nbsp;émission au 1ᵉʳ septembre 2026<br>PME (inclut TPE et micro)&nbsp;→&nbsp;émission au 1ᵉʳ septembre 2027<br>Catégorie non calculée&nbsp;→&nbsp;à vérifier (souvent entité récente, traitée par défaut comme PME / 2027)</div>
+    <p><b>À garder en tête.</b> La catégorie INSEE est un <b>indicateur de tri</b>, pas la qualification juridique définitive. Pour la réforme, la taille s'apprécie par entité légale à une date de référence (1ᵉʳ janvier 2025 selon la FAQ DGFiP) et au niveau du groupe / de l'assujetti unique. Pour les cas proches d'un seuil, vérifiez manuellement.</p>
+    <p>Une recherche par nom retourne la meilleure correspondance&nbsp;: vérifiez toujours le SIREN et la commune affichés, surtout pour les groupes à entités multiples. Une entreprise <b>introuvable</b> peut être établie hors de France&nbsp;: elle relève alors de l'e-reporting, pas de l'obligation d'émission.</p>
+    <p>Source des données&nbsp;: <a href="https://recherche-entreprises.api.gouv.fr" target="_blank" rel="noopener">recherche-entreprises.api.gouv.fr</a> (INSEE / RNE), mise à jour quotidienne.</p>
+  </div>
+</div>
+
+<script>
+const FOURNISSEURS_AMARENCO = ["PRIXTEL","CESML","ADISTA","RTE","EDF","UNYC","NORDNET","LUCIA","GEREDIS","TOTALENERGIES","CORIOLIS","BKW","ENERCOOP","ORANGE","RUNEO","MEDIALEX","ENEDIS","ALTERNA"];
+const API = "https://recherche-entreprises.api.gouv.fr/search";
+
+const $input = document.getElementById("input");
+const $run = document.getElementById("run");
+const $export = document.getElementById("export");
+const $progress = document.getElementById("progress");
+const $results = document.getElementById("results");
+const $summary = document.getElementById("summary");
+const $banner = document.getElementById("banner");
+
+$input.value = FOURNISSEURS_AMARENCO.join("\n");
+
+let lastRows = [];
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function classify(cat){
+  const c = (cat || "").toUpperCase();
+  if (c === "GE" || c === "ETI") return {year:"2026", cls:"s26", kicker:"Émission dès le", date:"1ᵉʳ sept."};
+  if (c === "PME")               return {year:"2027", cls:"s27", kicker:"Émission dès le", date:"1ᵉʳ sept."};
+  return {year:"À vérif.", cls:"sx", kicker:"Échéance", date:"indéterminée"};
+}
+
+async function lookup(term){
+  const q = term.trim();
+  const url = `${API}?q=${encodeURIComponent(q)}&per_page=5&page=1`;
+  const res = await fetch(url, {headers:{accept:"application/json"}});
+  if (res.status === 429) throw new Error("RATE");
+  if (!res.ok) throw new Error("HTTP_" + res.status);
+  const data = await res.json();
+  return data;
+}
+
+function render(rows){
+  $results.innerHTML = rows.map(r => {
+    if (r.status === "none"){
+      return `<div class="fiche flag">
+        <div class="ident"><div class="query">${esc(r.query)}</div>
+          <div class="name">Introuvable</div>
+          <div class="note">Aucune entreprise française trouvée. Vérifiez l'orthographe, ou partenaire potentiellement établi hors de France → relève de l'e-reporting, pas de l'émission.</div>
+        </div>
+        <div class="cat">—</div>
+        <div class="stamp sx"><div class="kicker">Échéance</div><div class="year">n/d</div></div>
+      </div>`;
+    }
+    const v = classify(r.categorie);
+    const flag = (!r.categorie || r.etat === "C" || r.total > 1);
+    let note = "";
+    if (r.etat === "C") note = "Entité administrativement cessée — à confirmer.";
+    else if (!r.categorie) note = "Catégorie non calculée par l'INSEE (souvent entité récente). Traitée par défaut comme PME (2027), à confirmer.";
+    else if (r.total > 1) note = `${r.total} correspondances — vérifiez que le SIREN ci-dessus est la bonne entité.`;
+    const catCls = (r.categorie||"").toLowerCase();
+    return `<div class="fiche${flag?' flag':''}">
+      <div class="ident">
+        <div class="query">${esc(r.query)}</div>
+        <div class="name">${esc(r.nom)}</div>
+        <div class="meta">SIREN ${esc(r.siren)}${r.ville?' · '+esc(r.ville):''}</div>
+        ${note?`<div class="note">${esc(note)}</div>`:""}
+      </div>
+      <div class="cat ${catCls}">${r.categorie ? esc(r.categorie) : "n/d"}</div>
+      <div class="stamp ${v.cls}">
+        <div class="kicker">${v.kicker}</div>
+        <div class="date">${v.date}</div>
+        <div class="year">${v.year}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const n26 = rows.filter(r=>r.status==="ok" && ["GE","ETI"].includes((r.categorie||"").toUpperCase())).length;
+  const n27 = rows.filter(r=>r.status==="ok" && (r.categorie||"").toUpperCase()==="PME").length;
+  const nx  = rows.length - n26 - n27;
+  $summary.className = "summary show";
+  $summary.innerHTML =
+    `<span class="pill s26"><b>${n26}</b> en septembre 2026</span>
+     <span class="pill s27"><b>${n27}</b> en septembre 2027</span>
+     <span class="pill sx"><b>${nx}</b> à vérifier</span>`;
+}
+
+async function run(){
+  $banner.className = "banner";
+  const terms = [...new Set($input.value.split("\n").map(s=>s.trim()).filter(Boolean))];
+  if (!terms.length) return;
+  $run.disabled = true; $export.disabled = true; $results.innerHTML = ""; $summary.className = "summary";
+  lastRows = [];
+
+  for (let i=0;i<terms.length;i++){
+    $progress.textContent = `Analyse ${i+1} / ${terms.length}…`;
+    const term = terms[i];
+    try{
+      const data = await lookup(term);
+      const hit = (data.results && data.results[0]) || null;
+      if (!hit){
+        lastRows.push({query:term, status:"none"});
+      } else {
+        lastRows.push({
+          query:term, status:"ok",
+          nom: hit.nom_complet || hit.nom_raison_sociale || "—",
+          siren: hit.siren || "—",
+          ville: hit.siege ? (hit.siege.libelle_commune || "") : "",
+          categorie: hit.categorie_entreprise || null,
+          etat: hit.etat_administratif || "",
+          total: data.total_results || 1
+        });
+      }
+    } catch(err){
+      if (err.message === "RATE"){ await sleep(1200); i--; continue; }
+      if (err instanceof TypeError){  // réseau / CORS bloqué
+        $banner.className = "banner show";
+        $banner.innerHTML = `<b>Connexion à l'API impossible depuis cet environnement.</b> Le navigateur a bloqué l'appel réseau (CORS ou pare-feu d'entreprise). Ouvrez la page hors du cadre intégré, ou utilisez la variante Excel / Power Query qui interroge la même API sans cette contrainte. Détail&nbsp;: <code>${esc(err.message)}</code>`;
+        break;
+      }
+      lastRows.push({query:term, status:"none"});
+    }
+    await sleep(180); // respecte la limite de 7 req/s
+  }
+
+  $progress.textContent = lastRows.length ? `${lastRows.length} entreprise(s) analysée(s).` : "";
+  if (lastRows.length) { render(lastRows); $export.disabled = false; }
+  $run.disabled = false;
+}
+
+function exportCSV(){
+  const head = ["Recherche","Entité trouvée","SIREN","Ville","Catégorie INSEE","Émission","Réception","Statut"];
+  const lines = lastRows.map(r=>{
+    if (r.status==="none") return [r.query,"Introuvable","","","","","1er septembre 2026","Vérifier / hors France ?"];
+    const v = classify(r.categorie);
+    const em = v.year==="2026" ? "1er septembre 2026" : v.year==="2027" ? "1er septembre 2027" : "À déterminer";
+    const st = !r.categorie ? "Catégorie non calculée" : r.etat==="C" ? "Entité cessée" : r.total>1 ? "Correspondances multiples" : "OK";
+    return [r.query, r.nom, r.siren, r.ville, r.categorie||"n/d", em, "1er septembre 2026", st];
+  });
+  const csv = [head,...lines].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "echeances-emission-facturation-electronique.csv";
+  a.click();
+}
+
+$run.addEventListener("click", run);
+$export.addEventListener("click", exportCSV);
+</script>
+</body>
+</html>
